@@ -1,2 +1,2 @@
 # python
-Some possibly useful python scripts
+Some useful useful python scripts
