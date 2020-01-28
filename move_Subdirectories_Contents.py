@@ -7,11 +7,11 @@ import shutil
 # @ Guilherme Trevisan V1.0
 
 # Path containing subdirectories (folders)
-#root_source_dir = r'C:\Users\USERNAME\Desktop\source' # Custom Path
-root_source_dir = os.getcwd() #Use Script location
+root_source_dir = r'C:\Source' # Custom Path
+#root_source_dir = os.getcwd() #Use Script location
 
 # Path to where content of subfolders will be moved to
-root_destination_dir = r'C:\Users\gtrevisan\Desktop\TestFolder\destination'
+root_destination_dir = r'C:\Destination'
 
 # A list to append only subfolders
 sourceFolders = []
