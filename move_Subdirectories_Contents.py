@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 
 # This script will go through the subdirectories of a folder and move all 
 # their content to a destionation folder.
@@ -7,14 +8,18 @@ import shutil
 # @ Guilherme Trevisan V1.0
 
 # Path containing subdirectories (folders)
-root_source_dir = r'C:\Source' # Custom Path
-#root_source_dir = os.getcwd() #Use Script location
+#root_source_dir = r'C:\Source' # Custom Path
+root_source_dir = os.getcwd() #Use Script location
 
 # Path to where content of subfolders will be moved to
-root_destination_dir = r'C:\Destination'
+root_destination_dir = r'F:\Destination'
 
 # A list to append only subfolders
 sourceFolders = []
+
+subdirectoriesLength = 0
+currentIndex = 1
+clear = lambda: os.system('cls')
 
 # Extract all folders in rootSourceDir 
 # and store their path in the sourceFolders list
@@ -23,10 +28,18 @@ for item in os.listdir(root_source_dir):
     if os.path.isdir(src_file):
         #print(src_file)
         sourceFolders.append(src_file)
-   
+
+clear()
+print()
+subdirectoriesLength = len(sourceFolders)
+print("    Number of subdirectories: " + str(subdirectoriesLength))
+
+
 # Walk through subfolders moving all contents 
 # to destination (overwriting)
-for subdir in sourceFolders:       
+for subdir in sourceFolders:
+    sys.stdout.write('\r' + "    Currently working on: " + str(currentIndex) + " out of " + str(subdirectoriesLength))
+    currentIndex += 1
     for src_dir, dirs, files in os.walk(subdir):
         dst_dir = src_dir.replace(subdir, root_destination_dir, 1)
         if not os.path.exists(dst_dir):
