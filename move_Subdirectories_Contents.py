@@ -1,18 +1,26 @@
+"""
+ This script will go through the subdirectories of a folder and move all their content to a destination folder.
+ @Guilherme Trevisan - TrevisanGMW@gmail.com - 2020-01-28 - github.com/TrevisanGMW
+ 
+
+How to use:
+1. Set Variable "root_destination_dir" to be your destination folder.
+2. Place script in the folder you want to extract.
+3. Run script.
+        
+""" 
+
 import os
 import shutil
 import sys
 
-# This script will go through the subdirectories of a folder and move all 
-# their content to a destionation folder.
-# Tested on Windows 10 - 2020-01-28
-# @ Guilherme Trevisan V1.0
 
 # Path containing subdirectories (folders)
 #root_source_dir = r'C:\Source' # Custom Path
 root_source_dir = os.getcwd() #Use Script location
 
 # Path to where content of subfolders will be moved to
-root_destination_dir = r'F:\Destination'
+root_destination_dir = r'C:\Destination'
 
 # A list to append only subfolders
 sourceFolders = []
