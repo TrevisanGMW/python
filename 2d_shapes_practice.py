@@ -37,7 +37,7 @@ import sys
 # Basic Variables
 render_gui = True
 WINDOW_SIZE = (1000, 1000) # 1000x1000 requirement
-pygame.display.set_caption("Python Assignment")
+pygame.display.set_caption("Python 2D Grid Practice")
 pygame.init()
 screen = pygame.display.set_mode(WINDOW_SIZE) if render_gui else None
 display = pygame.Surface(WINDOW_SIZE)
@@ -48,7 +48,7 @@ running = True
 
 class Point:
     ''' 
-    A class used to represent a Point. It also carries a few extra attributes so it can behave like a particles.
+    A class used to represent a Point. It also carries a few extra attributes so it can behave like a particle.
     
             Attributes:
                 x (int) : X position
