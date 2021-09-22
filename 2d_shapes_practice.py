@@ -63,7 +63,7 @@ class Point:
                 Parameters:
                     xy_pos (tuple, list) : X and Y positions. [x, y]
                     pscale (int) : particle/point scale. Value that can be inherited by instancers or used to calculate bbox before replacing it.
-                    shape_type : (int, optional) : Essentially an object index for the instancer. It stores a values (usually random) used to determine if the shape will be a rectangle, circle of diamond.
+                    shape_type : (int, optional) : Essentially an object index for the instancer. It stores a value (usually random) used to determine if the shape will be a rectangle, circle of diamond.
         '''
         self.x = xy_pos[0]
         self.y = xy_pos[1]
