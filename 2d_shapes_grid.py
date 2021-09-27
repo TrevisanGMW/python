@@ -36,7 +36,8 @@ ________________________________________
     v1.1.0
     Notes were addressed as such:
     1. A more OOP approach was added. Drawn Shapes (e.g. Rectangle) inherits Shape attributes that inherit Point attributes.
-    2. Not yet the suggested approach, but it might help. The random shape size is now shrunk to try to fit inside cell borders before being ignored. This should bring back some ignored random xy positions, since they now have a higher chance of happening.
+    2. The distribution is still a bit broken as I haven't yet used the suggested approach. What I did in this iteration though was to make random shape size shrink to try to fit inside cell borders before being ignored. 
+    This should bring back some ignored random xy positions, because they now have a higher chance of happening. As soon as I have some time I'll implement the shrinking domain approach (To better address distribution)
     3. Unnecessary magical numbers that were used in the main function are now properly named as constants under "Basic Variables".
 
 '''
