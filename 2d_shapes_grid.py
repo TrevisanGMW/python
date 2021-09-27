@@ -1,4 +1,5 @@
 '''
+v1.1.0
 ________________________________________
     Requirements:
 pygame:
@@ -26,6 +27,18 @@ They should be randomly but uniformly distributed inside our 1000x1000 area and 
 Once it’s done, we need to generate 1000 random point samples within the area and test which shape(s) each of them hits. 
 A point can hit more than one shape. 
 Print out the statistics how many of the 1000 shapes have been hit in total, and the median hit rate (shape hits per point sample).
+
+________________________________________
+    Change Log:
+    v1.0.0
+    Initial Release
+
+    v1.1.0
+    Notes were addressed as such:
+    1. A more OOP approach was added. Drawn Shapes (e.g. Rectangle) inherits Shape attributes that inherit Point attributes.
+    2. Not yet the suggested approach, but it might help. The random shape size is now shrunk to try to fit inside cell borders before being ignored. This should bring back some ignored random xy positions, since they now have a higher chance of happening.
+    3. Unnecessary magical numbers that were used in the main function are now properly named as constants under "Basic Variables".
+
 '''
 from pygame.constants import KEYDOWN, QUIT
 from math import sqrt
@@ -37,7 +50,14 @@ import sys
 # Basic Variables
 render_gui = True
 WINDOW_SIZE = (1000, 1000) # 1000x1000 requirement
-pygame.display.set_caption("Python 2D Grid Practice")
+NUM_SHAPES = 1000 # Total number of shapes to generate
+MAX_SHAPE_SIZE_PX = 100
+MIN_SHAPE_SIZE_PX = 10
+NUM_SAMPLE_POINTS = 1000 # Total number of sample points
+COLOR_RED = (255,0,0)
+COLOR_GREEN = (0,255,0)
+COLOR_BLUE = (0,0,255)
+pygame.display.set_caption("Assignment")
 pygame.init()
 screen = pygame.display.set_mode(WINDOW_SIZE) if render_gui else None
 display = pygame.Surface(WINDOW_SIZE)
@@ -53,21 +73,21 @@ class Point:
             Attributes:
                 x (int) : X position
                 y (int) : Y position
-                pscale (int) : particle/point scale. Value that can be inherited by instancers or used to calculate bbox before replacing it.
+                scale (int) : particle/point scale. Value that can be inherited by instancers or used to calculate bbox before replacing it.
                 bbox (tuple or None) : A tuple composed of (upper_left_corner, upper_right_corner, lower_left_corner, lower_right_corner) describing the bounding box of the point.
                                        This becomes available once the function "calculate_bbox" is called.
                 shape_type : (int) : Essentially an object index for the instancer. It stores a values (usually random) used to determine if the shape will be a rectangle, circle of diamond.
     '''
-    def __init__(self, xy_pos, pscale, shape_type=None):
+    def __init__(self, xy_pos, scale, shape_type=None):
         ''' 
                 Parameters:
                     xy_pos (tuple, list) : X and Y positions. [x, y]
-                    pscale (int) : particle/point scale. Value that can be inherited by instancers or used to calculate bbox before replacing it.
+                    scale (int) : particle/point scale. Value that can be inherited by instancers or used to calculate bbox before replacing it.
                     shape_type : (int, optional) : Essentially an object index for the instancer. It stores a value (usually random) used to determine if the shape will be a rectangle, circle of diamond.
         '''
         self.x = xy_pos[0]
         self.y = xy_pos[1]
-        self.pscale = pscale
+        self.scale = scale
         self.bbox = None
         self.shape_type = shape_type
 
@@ -89,11 +109,11 @@ class Point:
             radius = object.scale
             shape_type = object.shape_type
         elif isinstance(object, Point):
-            radius = object.pscale
+            radius = object.scale
             shape_type = overwrite_type if overwrite_type else 1 # Default to circle if no value was provided
         else:
             object = self
-            radius = object.pscale
+            radius = object.scale
             shape_type = object.shape_type
 
         if shape_type != 1:
@@ -121,7 +141,7 @@ class Point:
         self.bbox = bbox
         return bbox
 
-class Shape:
+class Shape(Point):
     ''' 
     A class used to represent a Shape.
     
@@ -130,7 +150,7 @@ class Shape:
                 shape_type (int) : Either 0 = Rectangle, 1 = Circle or 2 = Diamond. (this value is extracted from the provided point)
                 x (int) : X position. (this value is extracted from the provided point)
                 y (int) : Y position. (this value is extracted from the provided point)
-                pscale (int) : Object scale. For example, if 10, then a rectangle will be made of 10px x 10px.
+                scale (int) : Object scale. For example, if 10, then a rectangle will be made of 10px x 10px.
                 bbox (tuple or None) : A tuple composed of (upper_left_corner, upper_right_corner, lower_left_corner, lower_right_corner) 
                                        describing the bounding box of the shape. Value inherited from point.
     '''
@@ -140,19 +160,14 @@ class Shape:
                     unique_id (int) : Unique id number used to indentify object. (Key value)
                     point_obj (Point) : A Point object used to extract position, scale, shape and bbox.
         '''
+        super().__init__((point_obj.x,point_obj.y), point_obj.scale, point_obj.shape_type)
         self.unique_id = unique_id
-        self.shape_type = point_obj.shape_type
-        self.x = point_obj.x
-        self.y = point_obj.y
-        self.scale = point_obj.pscale
         self.bbox = point_obj.bbox
-
 
         self.diamond_points = ((self.x+(self.scale/2), self.y),
                                (self.x, self.y+(self.scale/2)),
                                (self.x-(self.scale/2), self.y),
                                (self.x, self.y-(self.scale/2)))
-
 
     def is_point_inside_triangle(self, point, triangle):
         """
@@ -230,6 +245,108 @@ class Shape:
                 shape = pygame.draw.circle(screen, COLOR_GREEN, (self.x, self.y), self.scale)
             else: # Must be 2 : Diamond
                 shape = pygame.draw.polygon(screen, COLOR_BLUE, self.diamond_points)
+
+
+class Rectangle(Shape):
+    ''' 
+    Rectangle shape with the necessary function to draw it.
+
+            Attributes:
+                unique_id (int) = Unique id number used to indentify object. (Key value)
+                shape_type (int) : Either 0 = Rectangle, 1 = Circle or 2 = Diamond. (this value is extracted from the provided point)
+                x (int) : X position. (this value is extracted from the provided point)
+                y (int) : Y position. (this value is extracted from the provided point)
+                scale (int) : Object scale. For example, if 10, then a rectangle will be made of 10px x 10px.
+                bbox (tuple or None) : A tuple composed of (upper_left_corner, upper_right_corner, lower_left_corner, lower_right_corner) 
+                                       describing the bounding box of the shape. Value inherited from point.
+                shape_color (tuple) : (R,G,B) 8bit description of the color of the shape for when drawing it
+    '''
+    def __init__(self, shape_obj, shape_color=(255,255,255)):
+        ''' 
+                Parameters:
+                    shape_obj (Shape) : Shape object to extract necessary parameters and behaviour of a shape
+                    shape_color (tuple, optional) : Shape color (R,G,B) Default = White = (255, 255, 255) 
+        '''
+        super().__init__(shape_obj.unique_id, shape_obj)
+        self.shape_color = shape_color
+
+
+    def draw(self):
+        """
+        Draws shapes to the main window (only if the "screen" object is available)
+        """      
+        if screen:
+            shape = pygame.draw.rect(screen, self.shape_color, pygame.Rect(self.x, self.y, self.scale, self.scale))
+            return shape
+
+class Circle(Shape):
+    ''' 
+    Circle shape with the necessary function to draw it.
+    
+            Attributes:
+                unique_id (int) = Unique id number used to indentify object. (Key value)
+                shape_type (int) : Either 0 = Rectangle, 1 = Circle or 2 = Diamond. (this value is extracted from the provided point)
+                x (int) : X position. (this value is extracted from the provided point)
+                y (int) : Y position. (this value is extracted from the provided point)
+                scale (int) : Object scale. For example, if 10, then a rectangle will be made of 10px x 10px.
+                bbox (tuple or None) : A tuple composed of (upper_left_corner, upper_right_corner, lower_left_corner, lower_right_corner) 
+                                       describing the bounding box of the shape. Value inherited from point.
+                shape_color (tuple) : (R,G,B) 8bit description of the color of the shape for when drawing it
+    '''
+    def __init__(self, shape_obj, shape_color=(255,255,255)):
+        ''' 
+                Parameters:
+                    shape_obj (Shape) : Shape object to extract necessary parameters and behaviour of a shape
+                    shape_color (tuple, optional) : Shape color (R,G,B) Default = White = (255, 255, 255) 
+        '''
+        super().__init__(shape_obj.unique_id, shape_obj)
+        self.shape_color = shape_color
+
+
+    def draw(self):
+        """
+        Draws shapes to the main window (only if the "screen" object is available)
+        """      
+        if screen:
+            shape = pygame.draw.circle(screen, self.shape_color, (self.x, self.y), self.scale)
+            return shape
+    
+class Diamond(Shape):
+    ''' 
+    Diamond shape with the necessary function to draw it.
+    
+            Attributes:
+                unique_id (int) = Unique id number used to indentify object. (Key value)
+                shape_type (int) : Either 0 = Rectangle, 1 = Circle or 2 = Diamond. (this value is extracted from the provided point)
+                x (int) : X position. (this value is extracted from the provided point)
+                y (int) : Y position. (this value is extracted from the provided point)
+                scale (int) : Object scale. For example, if 10, then a rectangle will be made of 10px x 10px.
+                bbox (tuple or None) : A tuple composed of (upper_left_corner, upper_right_corner, lower_left_corner, lower_right_corner) 
+                                       describing the bounding box of the shape. Value inherited from point.
+                shape_color (tuple) : (R,G,B) 8bit description of the color of the shape for when drawing it
+    '''
+    def __init__(self, shape_obj, shape_color=(255,255,255)):
+        ''' 
+                Parameters:
+                    shape_obj (Shape) : Shape object to extract necessary parameters and behaviour of a shape
+                    shape_color (tuple, optional) : Shape color (R,G,B) Default = White = (255, 255, 255) 
+        '''
+        super().__init__(shape_obj.unique_id, shape_obj)
+        self.shape_color = shape_color
+
+
+        self.diamond_points = ((self.x+(self.scale/2), self.y),
+                               (self.x, self.y+(self.scale/2)),
+                               (self.x-(self.scale/2), self.y),
+                               (self.x, self.y-(self.scale/2)))
+    def draw(self):
+        """
+        Draws shapes to the main window (only if the "screen" object is available)
+        """      
+        if screen:
+            shape = pygame.draw.polygon(screen, self.shape_color, self.diamond_points)
+            return shape
+    
 
 ### Functions ###
 
@@ -314,7 +431,7 @@ def generate_shapes(total_num_shapes, shape_max_scale, shape_min_scale, print_lo
                 random_scale = random_scale/2
 
             # Create new point and calculate its bbox
-            new_point = Point(random_xy_pos, random_scale, random_type)
+            new_point = Point(random_xy_pos, random_scale, random_type) 
             new_point.calculate_bbox()
         
             is_valid = True
@@ -323,25 +440,57 @@ def generate_shapes(total_num_shapes, shape_max_scale, shape_min_scale, print_lo
             upper_left_p = new_point.bbox[0]
             upper_right_p = new_point.bbox[1]
             lower_right_p = new_point.bbox[3]
-    
+
             # Make sure it doesn't go out of the current bucket area - Bucket order minX minY maxX maxY
+            is_inside_bucket = True
             if upper_left_p[0] < bucket_size[0] or upper_right_p[0] > bucket_size[2]: # X
                 is_valid = False
+                is_inside_bucket = False
             elif lower_right_p[1] > bucket_size[3] or upper_right_p[1] < bucket_size[1]: # Y
                 is_valid = False
+                is_inside_bucket = False
+
+            # If shape is close to corner, try shrinking it before ignoring the shape
+            while is_inside_bucket == False and random_scale > shape_min_scale:
+                
+                if upper_left_p[0] < bucket_size[0] or upper_right_p[0] > bucket_size[2]: # X
+                    is_valid = False
+                    random_scale -= 1
+                elif lower_right_p[1] > bucket_size[3] or upper_right_p[1] < bucket_size[1]: # Y
+                    is_valid = False
+                    random_scale -= 1
+                else:
+                    is_inside_bucket = True
+                    is_valid = True
+
+                # Create new point and calculate its bbox
+                new_point = Point(random_xy_pos, random_scale, random_type)
+                new_point.calculate_bbox()
+
+                # Unpack Variables Again
+                upper_left_p = new_point.bbox[0]
+                upper_right_p = new_point.bbox[1]
+                lower_right_p = new_point.bbox[3]
 
             # Only allow creation if not intersecting
-            for shape in current_bucket_shapes:
-                if is_bbox_intersecting(new_point.bbox, shape.bbox):
-                    is_valid = False
+            if is_valid: # Don't check it in case it already failed before
+                for shape in current_bucket_shapes:
+                    if is_bbox_intersecting(new_point.bbox, shape.bbox):
+                        is_valid = False
 
             # Created shape, draw and store to bucket list
             if is_valid:
                 new_shape = Shape(index, new_point)
                 index += 1
-                new_shape.draw()
-                drawn_shapes.append(new_shape)
-                current_bucket_shapes.append(new_shape)
+                if new_shape.shape_type == 0:
+                    new_drawn_shape = Rectangle(new_shape, COLOR_RED)
+                elif new_shape.shape_type == 1:
+                    new_drawn_shape = Circle(new_shape, COLOR_GREEN)
+                elif new_shape.shape_type == 2:
+                    new_drawn_shape = Diamond(new_shape, COLOR_BLUE)
+                new_drawn_shape.draw()
+                drawn_shapes.append(new_drawn_shape) 
+                current_bucket_shapes.append(new_drawn_shape)
                 current_num_shapes -= 1
 
         # Move Bucket Position
@@ -401,7 +550,7 @@ def generate_sample_points(num_points, draw_points=True, print_log=True):
 ### Run program if not importing it ###
 if __name__ == "__main__":
     if render_gui:
-        drawn_shapes = generate_shapes(1000, 100, 10, print_log=False)
+        drawn_shapes = generate_shapes(NUM_SHAPES, MAX_SHAPE_SIZE_PX, MIN_SHAPE_SIZE_PX, print_log=False)
         while running:
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -415,7 +564,7 @@ if __name__ == "__main__":
 
             pygame.display.update()
     else:
-        drawn_shapes = generate_shapes(1000, 100, 10, print_log=False)
-        generate_sample_points(1000)
+        drawn_shapes = generate_shapes(NUM_SHAPES, MAX_SHAPE_SIZE_PX, MIN_SHAPE_SIZE_PX, print_log=False)
+        generate_sample_points(NUM_SAMPLE_POINTS)
         pygame.quit()
         sys.exit()
