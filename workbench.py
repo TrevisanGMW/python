@@ -109,3 +109,37 @@ Pretty much a "history" file for python tests.
 # more_values = ["more_value_one", "more_value_two"]
 # values = some_values + more_values
 # print(values)
+
+
+# for num in range(2,8):
+#     if num% 2 ==0:
+#         continue
+#     print(num)
+
+# for num in range(10,14):
+#     for i in range(2,num):
+#         if num%i == 1:
+#             print(num)
+#             break
+
+# for num in range (2,-5,-1):
+#     print(num, end=", ")
+
+# numbers = [10, 20]
+# items = ["Apple", "Banana", "Orange"]
+
+# for number in numbers:
+#     for item in items:
+#         print(number, item, end= ", ")
+
+# num = 3
+# list = [2,5,8]
+# for l in list:
+#     num = num+l
+# print(num)
+
+# fruit_list = ['Apple', 'Banana', 'Orange']
+# for fruit in fruit_list:
+#     print(fruit*2)
+
+
