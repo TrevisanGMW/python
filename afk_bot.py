@@ -7,5 +7,5 @@ while True:
     y = random.randint(200, 600)
     speed = random.random()
     print("Moving to " + str(x) + ", " + str(y) + " (speed:" + str(speed) + ")")
-    pag.moveTo(x, y, speed)
+    pag.moveTo(x, y, speed, pyautogui.easeInOutQuad)
     time.sleep(2)
